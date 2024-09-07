@@ -5,8 +5,8 @@
     <script src="https://unpkg.com/jsqr"></script>
 </head>
 <body>
-    <video id="video" width="300" height="200" style="display:none;"></video>
-    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+    <video id="video" width="300" height="200"></video>
+    <canvas id="canvas" width="300" height="200"></canvas>
     <button onclick="startScan()">Scan QR</button>
     <p id="result"></p>
 
@@ -26,7 +26,6 @@
 
         function tick() {
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvasElement.hidden = false;
                 canvasElement.height = video.videoHeight;
                 canvasElement.width = video.videoWidth;
                 canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
