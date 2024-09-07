@@ -1,13 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR Code Scanner</title>
+    <title>Scan QR Code</title>
+    <script src="https://unpkg.com/jsqr"></script>
 </head>
 <body>
-    <h1>Scan your QR Code</h1>
-    <video id="reader" width="300px" height="300px"></video>
-    <button onclick="startScan()">Start Scanning</button>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="app.js"></script>
+    <video id="video" width="300" height="200" style="display:none;"></video>
+    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+    <button onclick="startScan()">Scan QR</button>
+    <p id="result"></p>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const canvas = canvasElement.getContext("2d");
+
+        function startScan() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                video.play();
+                requestAnimationFrame(tick);
+            });
+        }
+
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvasElement.hidden = false;
+                canvasElement.height = video.videoHeight;
+                canvasElement.width = video.videoWidth;
+                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+                var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (code) {
+                    document.getElementById('result').textContent = code.data;
+                    video.srcObject.getTracks().forEach(track => track.stop()); // Stop scanning once QR code is found
+                    return;
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+    </script>
 </body>
 </html>
